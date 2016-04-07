@@ -1,0 +1,28 @@
+.text-area-container {
+  border: 2px solid rgb(0, 150, 136);
+  width: auto;
+  display: flex;
+}
+
+#textarea {
+  overflow: hidden;
+  padding: 1em;
+  padding-right: 6em;
+  min-height: 3em;
+  width: 100%;
+  line-height: 1em;
+  z-index: 1;
+}
+
+.text-area-label {
+  z-index: 5;
+  position: absolute;
+  font-size: 1.25em;
+  font-weight: lighter;
+  text-align: right;
+  display: inline;
+  right: 0;
+  margin-right: 0.8em;
+  padding: 0.1em;
+  border: 2px solid rgb(0, 150, 136);
+}
