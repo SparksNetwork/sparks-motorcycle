@@ -2,11 +2,11 @@ import {AppBar, SideNav} from 'components/ui'
 
 import {mobileFrame, desktopFrame} from 'helpers'
 import {clickEvent} from 'util'
-import {mergeOrLatest} from 'util/most'
+import {mergeLatest, combineObj, withLatestFrom} from 'util/most'
 
 export function AppFrame(sources) {
   const appBar = AppBar(sources)
-  const navButton$ = sources.DOM.select('.nav-button').events(clickEvent)
+  const navButton$ = clickEvent(sources.DOM, '.nav-button')
   const sideNav = SideNav({
     content$: sources.nav$,
     isOpen$: navButton$.map(() => true).startWith(false),
@@ -14,19 +14,23 @@ export function AppFrame(sources) {
   })
 
   const children = [appBar, sideNav]
-  const auth$ = mergeOrLatest('auth$', children)
-  const route$ = mergeOrLatest('route$', children)
+  const auth$ = mergeLatest('auth$', children)
+  const route$ = mergeLatest('route$', children)
 
-  const layoutParams = {
+  const layoutParams$ = combineObj({
     sideNav: sideNav.DOM,
     appBar: appBar.DOM,
     header: sources.header$,
     page: sources.page$,
-  }
+  })
 
-  const DOM = sources.isMobile$.map(isMobile =>
-    isMobile ? mobileFrame(layoutParams) : desktopFrame(layoutParams)
-  )
+  const DOM =
+    withLatestFrom(
+      (params, isMobile) => {
+        return isMobile ? mobileFrame(params) : desktopFrame(params)
+      },
+      layoutParams$, sources.isMobile$
+    )
 
   return {DOM, auth$, route$}
 }

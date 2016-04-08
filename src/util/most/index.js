@@ -1,4 +1,4 @@
 export {withLatestFrom} from './withLatestFrom'
-export {pluck, pluckSwitch, pluckJoin} from './pluck'
+export {pluck} from './pluck'
 export {combineObj} from './combineObj'
-export {mergeOrLatest} from './mergeOrLatest'
+export {mergeLatest} from './mergeLatest'

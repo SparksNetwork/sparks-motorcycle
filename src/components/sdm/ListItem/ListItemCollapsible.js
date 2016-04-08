@@ -1,34 +1,32 @@
-import {merge, map, scan} from 'most'
+import {merge, combine} from 'most'
 import {div} from '@motorcycle/dom'
-import isolate from '@cycle/isolate'
 
 import {ListItemClickable} from './ListItemClickable'
-import {combineObj} from 'util/most'
+import {isolate} from 'util'
 
-const toTrue = () => true
-const toOpposite = (a, b) => !a ? b : !a
+const toOpposite = (a, b) => b === -1 ? !a : b
 
-const view = ({isOpen, listItem, content}) =>
-  div({}, [
+const view = (isOpen, content, listItem) => {
+  return div({}, [
     listItem,
-    isOpen ? div('.collapsible', {}, [content]) : null,
+    isOpen ? div('.collapsible', [content]) : null,
   ])
+}
 
 export function ListItemCollapsible(sources) {
   const li = isolate(ListItemClickable)(sources)
-
   const isOpen$ = merge(
+    li.click$.map(() => -1),
     sources.isOpen$,
-    scan(toOpposite, map(toTrue, li.click$))
-  )
+  ).scan(toOpposite, true)
 
-  const view$ = combineObj({
+  isOpen$.observe(console.log.bind(console))
+
+  const DOM = combine(view,
     isOpen$,
-    listItem: li.DOM,
-    content: sources.content$,
-  })
-
-  const DOM = map(view, view$)
+    sources.content$,
+    li.DOM
+  )
 
   return {DOM}
 }

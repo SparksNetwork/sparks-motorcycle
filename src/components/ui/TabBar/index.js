@@ -29,11 +29,11 @@ const view = createHref => (_tabs, currentRoute) =>
 
 export function TabBar(sources) {
   const {router: {createHref}} = sources
-  const route$ = sources.DOM.select('.tab-label-content').events(clickEvent)
+  const route$ = clickEvent(sources.DOM, '.tab-label-content')
     .map(e => e.ownerTarget.dataset.link)
     .skipRepeats()
 
-  const currentRoute$ = pluck('pathname', sources.router.observable)
+  const currentRoute$ = sources.router.observable.map(pluck('pathname'))
 
   const DOM = withLatestFrom(view(createHref), sources.tabs$, currentRoute$)
 

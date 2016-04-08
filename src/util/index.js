@@ -1,5 +1,8 @@
-import {map} from 'most'
+import {just, map, merge} from 'most'
 import hold from '@most/hold'
+
+import {isolate} from './isolate'
+export {isolate}
 
 const createComponent = sources => ({path, value: Component}) =>
   Component({...sources, router: sources.router.path(path)})
@@ -16,10 +19,20 @@ export const PROVIDERS = {
   logout: {type: 'logout'},
 }
 
-export const clickEvent =
-  `undefined` !== typeof document && document.ontouchstart ?
-    `touchstart` :
-    `click`
+export const clickEvent = (DOM, selector) =>
+  merge(
+    DOM.select(selector).events('touchstart', {useCapture: true}),
+    DOM.select(selector).events('click'),
+  )
+
+export const byMatch = (matchDomain, matchEvent) =>
+  ({domain, event}) => domain === matchDomain && event === matchEvent
+
+export const rows = obj =>
+  obj ? Object.keys(obj).map(k => ({$key: k, ...obj[k]})) : []
+
+export const controlsFromRows = (sources, _rows, Control) =>
+  _rows.map(row => isolate(Control,row.$key)({...sources, item$: just(row)}))
 
 export const material = {
   primaryColor: '#666',
@@ -57,5 +70,3 @@ export const material = {
     },
   },
 }
-
-export {isolate} from './isolate'

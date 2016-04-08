@@ -11,7 +11,7 @@ const view = (label, classNames) =>
   }, [label])
 
 export function FlatButton(sources) {
-  const click$ = sources.DOM.select('.flat-button').events(clickEvent)
+  const click$ = clickEvent(sources.DOM, '.flat-button')
   const label$ = sources.label$ || just('Button')
   const classNames$ = sources.classNames$ || just([])
 

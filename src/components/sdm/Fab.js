@@ -12,7 +12,7 @@ function view(icon, classNames) {
 }
 
 export function Fab(sources) {
-  const click$ = sources.DOM.select('.fab-button').events(clickEvent)
+  const click$ = clickEvent(sources.DOM, '.fab-button')
   const classNames$ = sources.classNames$ || just([])
   const DOM = combineArray(view, [sources.icon$ || empty(), classNames$])
   return {DOM, click$}

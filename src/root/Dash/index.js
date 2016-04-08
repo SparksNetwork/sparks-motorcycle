@@ -1,4 +1,5 @@
 import {just} from 'most'
+//import {isolate} from 'util'
 
 import {
   AppFrame,
@@ -7,9 +8,12 @@ import {
   ResponsiveTitle,
   MediumProfileAvatar} from 'components/ui'
 
-import {nestedComponent} from 'util'
-import {pluckSwitch, mergeOrLatest} from 'util/most'
+import {ListItemCollapsibleTextArea} from 'components/sdm'
 
+import {nestedComponent} from 'util'
+import {pluck, mergeLatest} from 'util/most'
+
+//import {Doing} from './Doing'
 import ComingSoon from 'components/ComingSoon'
 
 const _Tabs = sources => TabBar({...sources,
@@ -34,8 +38,17 @@ const _Title = sources => ResponsiveTitle({...sources,
   classes$: just(['profile']),
 })
 
+const testTextArea = sources => ({
+  DOM: ListItemCollapsibleTextArea({
+    ...sources,
+    title$: just('TextArea'),
+    value$: just('Wtf'),
+  }).DOM,
+})
+
 const routes = {
-  '/': ComingSoon('Dash/Doing'),
+  '/': testTextArea,
+  //'/': ComingSoon('Dash/Doing'), //isolate(Doing),
   '/finding': ComingSoon('Dash/Finding'),
   '/being': ComingSoon('Dash/Being'),
 }
@@ -53,7 +66,7 @@ export function Dash(sources) {
   const header = Header({...sources, title$: title.DOM, tabs$: tabs.DOM})
   const page$ = nestedComponent(sources, routes)
 
-  const pageDOM$ = pluckSwitch('DOM', page$)
+  const pageDOM$ = page$.map(pluck('DOM')).switch()
 
   const frame = AppFrame({..._sources,
     nav$: nav.DOM,
@@ -63,12 +76,12 @@ export function Dash(sources) {
 
   const children = [frame, tabs, title, nav, header]
 
-  const auth$ = mergeOrLatest('auth$', children)
-    .merge(pluckSwitch('auth$', page$))
-  const queue$ = mergeOrLatest('queue$', children)
-    .merge(pluckSwitch('queue$', page$))
-  const route$ = mergeOrLatest('route$', children)
-    .merge(pluckSwitch('route$', page$))
+  const auth$ = mergeLatest('auth$', children)
+    .merge(page$.map(pluck('auth$')).switch())
+  const queue$ = mergeLatest('queue$', children)
+    .merge(page$.map(pluck('queue$')).switch())
+  const route$ = mergeLatest('route$', children)
+    .merge(page$.chain(pluck('route$')))
 
   return {
     DOM: frame.DOM,

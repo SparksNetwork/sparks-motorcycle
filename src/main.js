@@ -11,16 +11,15 @@ import {isMobile$} from 'drivers/isMobile'
 
 import Root from './root'
 
-const routerArgs = supportsHistory() ?
-  [createHistory(), {capture: true}] :
-  [createHashHistory(), {capture: false}]
+const history = supportsHistory() ?
+  createHistory() : createHashHistory()
 
 const fbRoot = new Firebase(__FIREBASE_HOST__) // eslint-disable-line
 
 const {dispose} = run(Root, {
   isMobile$,
   DOM: makeDOMDriver('#root'),
-  router: makeRouterDriver(...routerArgs),
+  router: makeRouterDriver(history),
   firebase: makeFirebaseDriver(fbRoot),
   auth$: makeAuthDriver(fbRoot),
   queue$: makeQueueDriver(fbRoot.child('!queue')),

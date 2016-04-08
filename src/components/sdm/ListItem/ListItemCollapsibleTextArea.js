@@ -2,9 +2,8 @@ import {
   combineArray,
   just,
   merge,
-  never,
+  empty,
   map,
-  multicast,
   sampleWith} from 'most'
 import {div} from '@motorcycle/dom'
 
@@ -13,29 +12,36 @@ import {
   OkAndCancel} from 'components/sdm'
 import {ListItemCollapsible} from './ListItemCollapsible'
 
+import {isolate} from 'util'
+
 const mapFalse = stream => map(() => false, stream)
 
 export function ListItemCollapsibleTextArea(sources) {
-  const ta = TextAreaControl(sources)
-  const oac = OkAndCancel(sources)
+  const ta = isolate(TextAreaControl)(sources)
+  const oac = isolate(OkAndCancel)(sources)
 
   const content$ =
-    combineArray((...children) => div({}, children), [ta.DOM, oac.DOM])
+    combineArray((textarea, buttons) => div({}, [
+      div({}, [textarea]),
+      div({}, [buttons]),
+    ]), [ta.DOM, oac.DOM])
+    .multicast()
 
   const subtitle$ =
     combineArray((value, subtitle) => value ? value : subtitle, [
-      sources.value$,
+      sources.value$ || just('No value$'),
       sources.subtitle$ || just(null),
     ])
 
-  const isOpen$ = multicast(merge(
-    sources.isOpen$ || never(),
+  const isOpen$ = merge(
+    sources.isOpen$ || empty(),
     mapFalse(ta.enter$),
     mapFalse(oac.ok$),
-    mapFalse(oac.cancel$)
-  ))
+    mapFalse(oac.cancel$),
+  ).multicast().startWith(false)
 
-  const li = ListItemCollapsible({...sources, content$, subtitle$, isOpen$})
+  const li =
+    isolate(ListItemCollapsible)({...sources, content$, subtitle$, isOpen$})
 
   const value$ = merge(
     sampleWith(oac.ok$, ta.value$),

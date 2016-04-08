@@ -8,10 +8,11 @@ const view = (label, classNames) =>
     onClick: true,
     primary: true,
     className: ['raised-button', ...classNames].join(' '),
+    style: {zIndex: 1000},
   }, [label])
 
 export function RaisedButton(sources) {
-  const click$ = sources.DOM.select('.raised-button').events(clickEvent)
+  const click$ = clickEvent(sources.DOM, '.raised-button')
   const label$ = sources.label$ || just('Button')
   const classNames$ = sources.classNames$ || just([])
 

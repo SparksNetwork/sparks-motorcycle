@@ -18,7 +18,7 @@ import {
 
 // utilities
 import {isolate, nestedComponent} from 'util'
-import {pluck, pluckSwitch, pluckJoin} from 'util/most'
+import {pluck} from 'util/most'
 
 // Page components
 import {Landing} from './Landing'
@@ -32,7 +32,7 @@ const routes = {
 
 function createPreviousRoute$({router}) {
   return hold(
-      pluck('fullPath', router.observable)
+      router.observable.map(pluck('pathname'))
         .scan((acc, val) => [val, acc[0]], [null, null])
         .filter(arr => arr[1] !== '/confirm')
         .map(arr => arr[1])
@@ -55,17 +55,17 @@ function Root(sources) {
 
   const page$ = nestedComponent(appendedSources, routes)
 
-  const DOM = pluckSwitch('DOM', page$)
-  const auth$ = pluckSwitch('auth$', page$)
+  const DOM = page$.map(pluck('DOM')).switch()
+  const auth$ = page$.map(pluck('auth$')).switch()
   const {queue$} =
     AuthedActionManager({
       ...sources,
-      queue$: pluckSwitch('queue$', page$),
+      queue$: page$.map(pluck('queue$')).switch(),
     })
 
   queue$.observe(console.log.bind(console))
   const router = merge(
-    pluckJoin('route$', page$),
+    page$.chain(pluck('route$')),
     redirects.redirectUnconfirmed$
   )
 

@@ -1,16 +1,17 @@
 import './styles.scss'
 
-import {map, merge, just} from 'most'
+import {map, merge, just, combineArray} from 'most'
 import {div, textarea, h6} from '@motorcycle/dom'
 
-import {pluck, combineObj} from 'util/most'
+import {pluck} from 'util/most'
 
-const view = ({value, maxLength, length, height}) =>
+const view = (value, maxLength, length, height) =>
   div('.text-area-container', {}, [
     textarea('#textarea', {
       props: {maxLength},
       class: {input: true},
       style: {height},
+      key: 1,
     }, [
       value,
     ]),
@@ -30,26 +31,28 @@ export function TextAreaControl(sources) {
     .skipRepeats()
     .startWith('auto')
 
-  const value$ =
-    pluck('ownerTarget', 'value', input.events('input')).multicast()
+  const value$ = merge(input.events('input'), input.events('change'))
+    .map(pluck('ownerTarget', 'value'))
+    .map(x => typeof x === 'string' ? x : '')
+    .multicast()
 
-  const enter$ = input.events('keydown')
+  const enter$ = sources.DOM.select(':root').events('keypress')
     .filter(e => e.keyCode === 13)
     .tap(e => e.preventDefault())
     .multicast()
 
   const toLength = (x) => x && x.length || 0
   const length$ =
-    map(toLength, merge(value$, sources.value$ || just(''))).startWith(0)
+    map(toLength, value$).startWith(0)
 
-  const view$ = combineObj({
-    value$: sources.value$ || just(''),
-    maxLength$: sources.maxLength || just(160),
-    length$,
-    height$,
-  })
-
-  const DOM = map(view, view$)
+  const DOM = combineArray(
+    view, [
+      sources.value$ || just(''),
+      sources.maxLength || just(160),
+      length$,
+      height$,
+    ]
+  )
 
   return {DOM, value$, enter$}
 }

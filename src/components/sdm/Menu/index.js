@@ -49,7 +49,7 @@ function menuView(isOpen, children, leftAlign) {
 }
 
 export function Menu(sources) {
-  const click$ = sources.DOM.select('.close').events(clickEvent)
+  const click$ = clickEvent(sources.DOM, '.close')
   const isOpen$ =
     startWith(false, merge(sources.isOpen$, map(() => false, click$)))
 
@@ -73,7 +73,7 @@ const menuItemView = (iconName, title) =>
   ])
 
 export function MenuItem(sources) {
-  const click$ = sources.DOM.select('.item').events(clickEvent)
+  const click$ = clickEvent(sources.DOM, '.item')
   const iconName$ = sources.iconName$ || just(null)
   const title$ = sources.title || just('no title$')
   const DOM = combineArray(menuItemView, [iconName$, title$])

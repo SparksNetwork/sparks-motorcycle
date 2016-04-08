@@ -30,7 +30,7 @@ function view(isMobile, isOpen, content) {
 }
 
 export function SideNav(sources) {
-  const close$ = sources.DOM.select('.close-sideNav').events(clickEvent)
+  const close$ = clickEvent(sources.DOM, '.close-sideNav')
     .map(() => false)
 
   const isMobile$ = sources.isMobile$

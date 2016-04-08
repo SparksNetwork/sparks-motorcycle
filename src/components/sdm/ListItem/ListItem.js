@@ -15,7 +15,7 @@ const contentClass = (...views) =>
 
 function listItemView(classes, leftView, title, //eslint-disable-line
                       subtitle, rightView, isVisible) {
-  return isVisible ?
+  return isVisible ? div({}, [
     div({class: {...liClasses, ...classes}}, [
       leftView && div('.left.xcol-sm-1', [leftView]),
 
@@ -25,7 +25,7 @@ function listItemView(classes, leftView, title, //eslint-disable-line
       ].filter(Boolean)),
 
       rightView && div('.right.xcol-sm-1', [rightView]),
-    ].filter(Boolean)) : null
+    ].filter(Boolean))]) : null
 }
 
 export function ListItem(sources) {
